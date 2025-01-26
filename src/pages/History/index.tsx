@@ -1,4 +1,4 @@
-import { HistoryContainer, HistoryList } from "./styles";
+import { HistoryContainer, HistoryList, Status } from "./styles";
 
 export function History() {
     return(
@@ -22,35 +22,45 @@ export function History() {
                             <td> Conserto de débito técnico </td>
                             <td> 25 minutos </td>
                             <td> Há cerca de 2 semana </td>
-                            <td> Em andamento</td>
+                            <td>
+                                <Status statusColor="green"> Concluido </Status>
+                            </td>
                         </tr>
 
                         <tr>
                             <td> Conserto de débito técnico </td>
                             <td> 25 minutos </td>
                             <td> Há cerca de 2 semana </td>
-                            <td> Em andamento</td>
+                            <td>
+                                <Status statusColor="red"> Interrompido </Status>
+                            </td>
                         </tr>
 
                         <tr>
                             <td> Conserto de débito técnico </td>
                             <td> 25 minutos </td>
                             <td> Há cerca de 2 semana </td>
-                            <td> Em andamento</td>
+                            <td>
+                                <Status statusColor="yellow"> Em andamento </Status>
+                            </td>
                         </tr>
 
                         <tr>
                             <td> Conserto de débito técnico </td>
                             <td> 25 minutos </td>
                             <td> Há cerca de 2 semana </td>
-                            <td> Em andamento</td>
+                            <td>
+                                <Status statusColor="green"> Em andamento </Status>
+                            </td>
                         </tr>
 
                         <tr>
                             <td> Conserto de débito técnico </td>
                             <td> 25 minutos </td>
                             <td> Há cerca de 2 semana </td>
-                            <td> Em andamento</td>
+                            <td>
+                                <Status statusColor="yellow"> Em andamento </Status>
+                            </td>
                         </tr>
 
                     </tbody>

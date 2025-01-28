@@ -12,6 +12,7 @@ import {
         StartCountdownButton, 
         TaskInput 
 } from "./styles";
+import { useState } from "react";
 
 const newCycleFormValidationSchema = zod.object({
     task: zod.string().min(1, 'Informe a tarefa'),
@@ -31,10 +32,20 @@ const newCycleFormValidationSchema = zod.object({
 /* Agora não é mais necessário utilizar a interface */
 type NewCycleFormData = zod.infer<typeof newCycleFormValidationSchema>
 
+// 1 interface Cycle {
+//     id: string;
+//     task: string;
+//     minutesAmount: number;
+// } 
+
 export function Home() {
 
+    // 2 const [cycles, setCycles] = useState<Cycle[]>([]) /*Minha lista de task como estado, sempre iniciando com a informaççao do mesmo tipo de utilização */
+    // const [activeCycleId, setActiveCycleId] = useState<string | null>(null)
+
+
     /*formState  - fornece uma variavel chamada errors, possibilitando identificar as mensagens que ocorre em nosso form: formState.errors  // console.log(formState.errors) */
-    const { register, handleSubmit, watch, /*formState*/ } = useForm<NewCycleFormData>({
+    const { register, handleSubmit, watch, reset /*formState*/ } = useForm<NewCycleFormData>({
         resolver: zodResolver(newCycleFormValidationSchema),
         defaultValues: {
             task: '',
@@ -43,11 +54,24 @@ export function Home() {
     })
 
     function handleCreateNewCycle(data: NewCycleFormData) {
-        console.log(data.task, data.minutesAmount)
+
+        const  id = String(new Date().getTime())
+        const newCycle: Cycle = {
+            id,
+            task: data.task,
+            minutesAmount: data.minutesAmount,
+        }
+        // setCycles([...cycles, newCycle])  /* Correto, mas como esse valor depende do valor atual vamos setar na forma de funççao*/
+        
+        // 3 setCycles((state) =>[...state, newCycle])  
+        // 3 setActiveCycleId(id)
+        
+        reset();
     }
 
-   
+   const activeCycle = cycles.find((cycle) => cycle.id === activeCycleId)
 
+    console.log(activeCycle)
     const task = watch('task')
     const isSubmitDisabled = !task
 

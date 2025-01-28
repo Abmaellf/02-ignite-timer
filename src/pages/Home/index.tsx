@@ -41,8 +41,8 @@ interface Cycle {
 export function Home() {
 
     const [cycles, setCycles] = useState<Cycle[]>([]) /*Minha lista de task como estado, sempre iniciando com a informaççao do mesmo tipo de utilização */
-    const [activeCycleId, setActiveCycleId] = useState<string | null>(null)
-
+    const [activeCycleId, setActiveCycleId] = useState<string | null>(null)  // Ciclo que esta ativo
+    const [amountSecondsPassed, setAmountSecondsPassed] = useState(0) // O tanto de segundos que já se passou, desde que o ciclo foi ativado
 
     /*formState  - fornece uma variavel chamada errors, possibilitando identificar as mensagens que ocorre em nosso form: formState.errors  // console.log(formState.errors) */
     const { register, handleSubmit, watch, reset /*formState*/ } = useForm<NewCycleFormData>({
@@ -71,10 +71,18 @@ export function Home() {
 
    const activeCycle = cycles.find((cycle) => cycle.id === activeCycleId)
 
+   const totalSeconds =  activeCycle ? activeCycle.minutesAmount * 60 : 0  // Verifica se tem ciclo ativo e se ativo, então o total de segundos será o minutos do ciclo ativo vezez 60 se não zero
+   const currentSeconds = activeCycle ? totalSeconds - amountSecondsPassed : 0
+
+   const minutesAmount = Math.floor(currentSeconds / 60)  // Dividindo o total de secundos por sessenta e arredondando para baixo
+   const secondsAmount = currentSeconds % 60
+
+   const minutes = String(minutesAmount).padStart(2, '0') // padStart sempre vai preencher com 2 caracteres
+   const seconds = String(secondsAmount).padStart(2, '0') // padStart sempre vai preencher com 2 caracteres
+
     console.log(activeCycle)
     const task = watch('task')
     const isSubmitDisabled = !task
-
 
     return(
         <HomeContainer>
@@ -111,11 +119,11 @@ export function Home() {
                  </FormContainer>
            
                 <CountdownContainer>
-                    <span>0</span>
-                    <span>0</span>
+                    <span>{minutes[0]}</span>
+                    <span>{minutes[1]}</span>
                     <Separator>:</Separator>
-                    <span>0</span>
-                    <span>0</span>
+                    <span>{seconds[0]}</span>
+                    <span>{seconds[1]}</span>
                 </CountdownContainer>
 
                 <StartCountdownButton disabled={isSubmitDisabled} type="submit">

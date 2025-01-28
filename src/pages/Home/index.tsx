@@ -32,16 +32,16 @@ const newCycleFormValidationSchema = zod.object({
 /* Agora não é mais necessário utilizar a interface */
 type NewCycleFormData = zod.infer<typeof newCycleFormValidationSchema>
 
-// 1 interface Cycle {
-//     id: string;
-//     task: string;
-//     minutesAmount: number;
-// } 
+interface Cycle {
+    id: string;
+    task: string;
+    minutesAmount: number;
+} 
 
 export function Home() {
 
-    // 2 const [cycles, setCycles] = useState<Cycle[]>([]) /*Minha lista de task como estado, sempre iniciando com a informaççao do mesmo tipo de utilização */
-    // const [activeCycleId, setActiveCycleId] = useState<string | null>(null)
+    const [cycles, setCycles] = useState<Cycle[]>([]) /*Minha lista de task como estado, sempre iniciando com a informaççao do mesmo tipo de utilização */
+    const [activeCycleId, setActiveCycleId] = useState<string | null>(null)
 
 
     /*formState  - fornece uma variavel chamada errors, possibilitando identificar as mensagens que ocorre em nosso form: formState.errors  // console.log(formState.errors) */
@@ -63,8 +63,8 @@ export function Home() {
         }
         // setCycles([...cycles, newCycle])  /* Correto, mas como esse valor depende do valor atual vamos setar na forma de funççao*/
         
-        // 3 setCycles((state) =>[...state, newCycle])  
-        // 3 setActiveCycleId(id)
+         setCycles((state) =>[...state, newCycle])  
+         setActiveCycleId(id)
         
         reset();
     }

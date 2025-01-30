@@ -45,7 +45,7 @@ export function Home() {
 
     const [cycles, setCycles] = useState<Cycle[]>([]) /*Minha lista de task como estado, sempre iniciando com a informaççao do mesmo tipo de utilização */
     const [activeCycleId, setActiveCycleId] = useState<string | null>(null)  // Ciclo que esta ativo
-    const [amountSecondsPassed, setAmountSecondsPassed] = useState(0) // O tanto de segundos que já se passou, desde que o ciclo foi ativado
+    const [amountSecondsPassed, setAmountSecondsPassed] = useState(0) // O total de segundos que já se passou, desde que o ciclo foi ativado
 
     /*formState  - fornece uma variavel chamada errors, possibilitando identificar as mensagens que ocorre em nosso form: formState.errors  // console.log(formState.errors) */
     const { register, handleSubmit, watch, reset /*formState*/ } = useForm<NewCycleFormData>({
@@ -57,15 +57,23 @@ export function Home() {
     })
 
     const activeCycle = cycles.find((cycle) => cycle.id === activeCycleId)
-
+    /*o useEffect pode ter um retorno*/
+    /* useEffect({ return },[])*/
     useEffect(() => {
+        let interval: number;
+
         if (activeCycle) {
-            setInterval(()=> {
+            interval = setInterval(()=> {
                 setAmountSecondsPassed(
-                    differenceInSeconds(new Date(), activeCycle.startDate),
+                    differenceInSeconds(new Date(), activeCycle.startDate), /*calcula a diferença de segundos que já passaram, da data atual para data que começou o cliclo dentro de um intervalo de segundos começou o cilco  */
                 )
             }, 1000)
         }
+
+        return () => {
+            clearInterval(interval)
+        }
+
     }, [activeCycle])
 
     function handleCreateNewCycle(data: NewCycleFormData) {
@@ -82,6 +90,7 @@ export function Home() {
         
          setCycles((state) =>[...state, newCycle])  
          setActiveCycleId(id)
+         setAmountSecondsPassed(0)
         
         reset();
     }
@@ -97,6 +106,11 @@ export function Home() {
    const minutes = String(minutesAmount).padStart(2, '0') // padStart sempre vai preencher com 2 caracteres
    const seconds = String(secondsAmount).padStart(2, '0') // padStart sempre vai preencher com 2 caracteres
 
+   useEffect(()=> {
+    if(activeCycle) {
+        document.title = `${minutes}:${seconds}`
+    }
+   }, [minutes, seconds, activeCycle])
     console.log(activeCycle)
     const task = watch('task')
     const isSubmitDisabled = !task

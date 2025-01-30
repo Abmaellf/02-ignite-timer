@@ -2,6 +2,7 @@ import { Play } from "phosphor-react";
 import { useForm } from 'react-hook-form';
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as zod from 'zod'; /* zod não tem um export default, então temos que renomear*/
+import { differenceInSeconds } from "date-fns";
 
 import { 
         CountdownContainer, 
@@ -12,14 +13,15 @@ import {
         StartCountdownButton, 
         TaskInput 
 } from "./styles";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 const newCycleFormValidationSchema = zod.object({
     task: zod.string().min(1, 'Informe a tarefa'),
     minutesAmount: 
         zod.number()
             .min(5, 'O ciclo precisa ser de no mínimo de 5 minutos')
-            .max(60, 'O ciclo precisa se de no maximo de 60 minutos'), 
+            .max(60, 'O ciclo precisa se de no maximo de 60 minutos')
+   
 })
 /*      Preferimos utilizar uma interface quando vamos definir um objeto de validação
         interface NewCycleFormData {
@@ -36,6 +38,7 @@ interface Cycle {
     id: string;
     task: string;
     minutesAmount: number;
+    startDate: Date;      // data que ele ficou ativo
 } 
 
 export function Home() {
@@ -53,13 +56,27 @@ export function Home() {
         }
     })
 
+    const activeCycle = cycles.find((cycle) => cycle.id === activeCycleId)
+
+    useEffect(() => {
+        if (activeCycle) {
+            setInterval(()=> {
+                setAmountSecondsPassed(
+                    differenceInSeconds(new Date(), activeCycle.startDate),
+                )
+            }, 1000)
+        }
+    }, [activeCycle])
+
     function handleCreateNewCycle(data: NewCycleFormData) {
 
         const  id = String(new Date().getTime())
+
         const newCycle: Cycle = {
             id,
             task: data.task,
             minutesAmount: data.minutesAmount,
+            startDate: new Date(),
         }
         // setCycles([...cycles, newCycle])  /* Correto, mas como esse valor depende do valor atual vamos setar na forma de funççao*/
         
@@ -69,7 +86,7 @@ export function Home() {
         reset();
     }
 
-   const activeCycle = cycles.find((cycle) => cycle.id === activeCycleId)
+   
 
    const totalSeconds =  activeCycle ? activeCycle.minutesAmount * 60 : 0  // Verifica se tem ciclo ativo e se ativo, então o total de segundos será o minutos do ciclo ativo vezez 60 se não zero
    const currentSeconds = activeCycle ? totalSeconds - amountSecondsPassed : 0

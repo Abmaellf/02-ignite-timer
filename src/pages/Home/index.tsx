@@ -20,7 +20,7 @@ const newCycleFormValidationSchema = zod.object({
     task: zod.string().min(1, 'Informe a tarefa'),
     minutesAmount: 
         zod.number()
-            .min(5, 'O ciclo precisa ser de no mínimo de 5 minutos')
+            .min(1, 'O ciclo precisa ser de no mínimo de 5 minutos') /* ajuste para um minuto para teste*/
             .max(60, 'O ciclo precisa se de no maximo de 60 minutos')
    
 })
@@ -40,7 +40,8 @@ interface Cycle {
     task: string;
     minutesAmount: number;
     startDate: Date;      // data que ele ficou ativo
-    interruptedDate?: Date // Essa data é opcional
+    interruptedDate?: Date // Data da interrupção do cicloEssa data é opcional
+    finishedDate?: Date // Data da conclusão do ciclo Essa data é opcional
 } 
 
 export function Home() {
@@ -59,16 +60,43 @@ export function Home() {
     })
 
     const activeCycle = cycles.find((cycle) => cycle.id === activeCycleId)
+
+    const totalSeconds =  activeCycle ? activeCycle.minutesAmount * 60 : 0  // Verifica se tem ciclo ativo e se ativo, então o total de segundos será o minutos do ciclo ativo vezez 60 se não zero
+
     /*o useEffect pode ter um retorno*/
     /* useEffect({ return },[])*/
+    /*Esse  useEffect é para calcular a diferença do tempo passado em cada segundo e
+      E se a diferença for maior ou igual ao total de segundos defindo(no caso terminou) então chama a função de finalizar
+    */
     useEffect(() => {
         let interval: number;
 
         if (activeCycle) {
+
             interval = setInterval(()=> {
-                setAmountSecondsPassed(
-                    differenceInSeconds(new Date(), activeCycle.startDate), /*calcula a diferença de segundos que já passaram, da data atual para data que começou o cliclo dentro de um intervalo de segundos começou o cilco  */
+
+               const secondsDifference =  differenceInSeconds( 
+                    new Date(), 
+                    activeCycle.startDate
+                ) /*calcula a diferença de segundos que já passaram, da data atual para data que começou o cliclo dentro de um intervalo de segundos começou o cilco  */
+                
+                if (secondsDifference >= totalSeconds ) {
+                    setCycles(state =>  state.map((cycle) => {
+                        if(cycle.id === activeCycleId) {
+                            return { ...cycle, finishedDate: new Date() }
+                         } else {
+                             return cycle
+                         }
+                     })
                 )
+                
+                setAmountSecondsPassed(totalSeconds)
+
+                clearInterval(interval)
+                } else {
+                    setAmountSecondsPassed( secondsDifference )
+
+                }
             }, 1000)
         }
 
@@ -76,7 +104,7 @@ export function Home() {
             clearInterval(interval)
         }
 
-    }, [activeCycle])
+    }, [activeCycle, totalSeconds, activeCycleId])
 
     function handleCreateNewCycle(data: NewCycleFormData) {
 
@@ -99,8 +127,8 @@ export function Home() {
 
    function handleInterruptCycle() {
        
-       setCycles(
-           cycles.map((cycle) => {
+       setCycles((state) =>
+       state.map((cycle) => {
                if(cycle.id === activeCycleId) {
                    return { ...cycle, interruptedDate: new Date() }
                 } else {
@@ -111,7 +139,6 @@ export function Home() {
         setActiveCycleId(null)
   }
 
-   const totalSeconds =  activeCycle ? activeCycle.minutesAmount * 60 : 0  // Verifica se tem ciclo ativo e se ativo, então o total de segundos será o minutos do ciclo ativo vezez 60 se não zero
    const currentSeconds = activeCycle ? totalSeconds - amountSecondsPassed : 0
 
    const minutesAmount = Math.floor(currentSeconds / 60)  // Dividindo o total de secundos por sessenta e arredondando para baixo
@@ -125,11 +152,12 @@ export function Home() {
         document.title = `${minutes}:${seconds}`
     }
    }, [minutes, seconds, activeCycle])
-    console.log(activeCycle)
+
+    
     const task = watch('task')
     const isSubmitDisabled = !task
 
-    console.log(cycles)
+   
 
     return(
         <HomeContainer>
@@ -158,7 +186,7 @@ export function Home() {
                         type="number" 
                         id="minutesAmount"
                         step={5}
-                        min={5}
+                        min={1} /*Ajustes de 5 para 1, para teste*/
                         max={60}
                         disabled={!!activeCycle}
                         {... register('minutesAmount', { valueAsNumber: true})}

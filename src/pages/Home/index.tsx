@@ -14,28 +14,13 @@ import {
         StopCountdownButton, 
         TaskInput 
 } from "./styles";
-import { useEffect, useState } from "react";
+import { createContext, useEffect, useState } from "react";
 import { NewCycleForm } from "./components/NewCycleForm";
 import { Countdown } from "./components/Countdown";
 
-const newCycleFormValidationSchema = zod.object({
-    task: zod.string().min(1, 'Informe a tarefa'),
-    minutesAmount: 
-        zod.number()
-            .min(1, 'O ciclo precisa ser de no mínimo de 5 minutos') /* ajuste para um minuto para teste*/
-            .max(60, 'O ciclo precisa se de no maximo de 60 minutos')
-   
-})
-/*      Preferimos utilizar uma interface quando vamos definir um objeto de validação
-        interface NewCycleFormData {
-            task: string;
-            minutesAmount: number;
-        }     
-*/
 
-/* E prefirimos utilizaro type quando vamos criar uma tipagem apartir de outra referencia ou variável: do typescript*/
-/* Agora não é mais necessário utilizar a interface */
-type NewCycleFormData = zod.infer<typeof newCycleFormValidationSchema>
+// Prop Drilling --> Quando agente tem MUITAS proprieddes APENAS para comunicação entre compopnentes 
+// Context API --> Permite compartilharmos informações entre VÁRIOS   componentes ao mesmo tempo
 
 interface Cycle {
     id: string;
@@ -46,67 +31,21 @@ interface Cycle {
     finishedDate?: Date // Data da conclusão do ciclo Essa data é opcional
 } 
 
+interface CyclesContextType {
+    
+}
+const CyclesContext = createContext({})
+
 export function Home() {
 
     const [cycles, setCycles] = useState<Cycle[]>([]) /*Minha lista de task como estado, sempre iniciando com a informaççao do mesmo tipo de utilização */
     const [activeCycleId, setActiveCycleId] = useState<string | null>(null)  // Ciclo que esta ativo
-    const [amountSecondsPassed, setAmountSecondsPassed] = useState(0) // O total de segundos que já se passou, desde que o ciclo foi ativado
-
+   
     /*formState  - fornece uma variavel chamada errors, possibilitando identificar as mensagens que ocorre em nosso form: formState.errors  // console.log(formState.errors) */
-    const { register, handleSubmit, watch, reset /*formState*/ } = useForm<NewCycleFormData>({
-        resolver: zodResolver(newCycleFormValidationSchema),
-        defaultValues: {
-            task: '',
-            minutesAmount: 0,  
-        }
-    })
 
     const activeCycle = cycles.find((cycle) => cycle.id === activeCycleId)
 
-    const totalSeconds =  activeCycle ? activeCycle.minutesAmount * 60 : 0  // Verifica se tem ciclo ativo e se ativo, então o total de segundos será o minutos do ciclo ativo vezez 60 se não zero
-
-    /*o useEffect pode ter um retorno*/
-    /* useEffect({ return },[])*/
-    /*Esse  useEffect é para calcular a diferença do tempo passado em cada segundo e
-      E se a diferença for maior ou igual ao total de segundos defindo(no caso terminou) então chama a função de finalizar
-    */
-    useEffect(() => {
-        let interval: number;
-
-        if (activeCycle) {
-
-            interval = setInterval(()=> {
-
-               const secondsDifference =  differenceInSeconds( 
-                    new Date(), 
-                    activeCycle.startDate
-                ) /*calcula a diferença de segundos que já passaram, da data atual para data que começou o cliclo dentro de um intervalo de segundos começou o cilco  */
-                
-                if (secondsDifference >= totalSeconds ) {
-                    setCycles(state =>  state.map((cycle) => {
-                        if(cycle.id === activeCycleId) {
-                            return { ...cycle, finishedDate: new Date() }
-                         } else {
-                             return cycle
-                         }
-                     })
-                )
-                
-                setAmountSecondsPassed(totalSeconds)
-
-                clearInterval(interval)
-                } else {
-                    setAmountSecondsPassed( secondsDifference )
-
-                }
-            }, 1000)
-        }
-
-        return () => {
-            clearInterval(interval)
-        }
-
-    }, [activeCycle, totalSeconds, activeCycleId])
+   
 
     function handleCreateNewCycle(data: NewCycleFormData) {
 
@@ -159,15 +98,17 @@ export function Home() {
     const task = watch('task')
     const isSubmitDisabled = !task
 
-   
-
     return(
         <HomeContainer>
             <form onSubmit={handleSubmit(handleCreateNewCycle)} action="">
 
                <NewCycleForm />  
 
-               <Countdown />
+               <Countdown  
+                    activeCycle={activeCycle}
+                    setCycles={setCycles}
+                    activeCycleId={activeCycleId}
+                />
            
                { activeCycle ? (
                         <StopCountdownButton onClick={handleInterruptCycle} type="button">

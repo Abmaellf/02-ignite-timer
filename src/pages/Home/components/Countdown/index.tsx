@@ -1,6 +1,7 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { CountdownContainer, Separator } from "./styles";
 import { differenceInSeconds } from "date-fns";
+import { CyclesContext } from "../..";
 
 interface  CountdownProps {
     activeCycle: any,
@@ -10,6 +11,7 @@ interface  CountdownProps {
 
 
  export function Countdown() {
+    const { activeCycle, activeCycleId, markCurrentCycleAsFinished } = useContext(CyclesContext)
 
     const [amountSecondsPasse, setAmountSecondsPassed] = useState(0) // O total de segundos que já se passou, desde que o ciclo foi ativado
     
@@ -34,14 +36,15 @@ interface  CountdownProps {
                 ) /*calcula a diferença de segundos que já passaram, da data atual para data que começou o cliclo dentro de um intervalo de segundos começou o cilco  */
                 
                 if (secondsDifference >= totalSeconds ) {
-                    setCycles(state =>  state.map((cycle) => {
-                        if(cycle.id === activeCycleId) {
-                            return { ...cycle, finishedDate: new Date() }
-                         } else {
-                             return cycle
-                         }
-                     })
-                )
+                    markCurrentCycleAsFinished()
+                //     setCycles(state =>  state.map((cycle) => {
+                //         if(cycle.id === activeCycleId) {
+                //             return { ...cycle, finishedDate: new Date() }
+                //          } else {
+                //              return cycle
+                //          }
+                //      })
+                // )
                 
                 setAmountSecondsPassed(totalSeconds)
 
@@ -57,8 +60,21 @@ interface  CountdownProps {
             clearInterval(interval)
         }
 
-    }, [activeCycle, totalSeconds, activeCycleId])
+    }, [activeCycle, totalSeconds, activeCycleId, markCurrentCycleAsFinished])
 
+     const currentSeconds = activeCycle ? totalSeconds - amountSecondsPassed : 0
+    
+       const minutesAmount = Math.floor(currentSeconds / 60)  // Dividindo o total de secundos por sessenta e arredondando para baixo
+       const secondsAmount = currentSeconds % 60
+    
+       const minutes = String(minutesAmount).padStart(2, '0') // padStart sempre vai preencher com 2 caracteres
+       const seconds = String(secondsAmount).padStart(2, '0') // padStart sempre vai preencher com 2 caracteres
+    
+       useEffect(()=> {
+        if(activeCycle) {
+            document.title = `${minutes}:${seconds}`
+        }
+       }, [minutes, seconds, activeCycle])
     
     return(
         <CountdownContainer>

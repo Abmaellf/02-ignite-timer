@@ -30,41 +30,137 @@ interface Cycle {
     interruptedDate?: Date // Data da interrupção do cicloEssa data é opcional
     finishedDate?: Date // Data da conclusão do ciclo Essa data é opcional
 } 
-
 interface CyclesContextType {
-    
+    activeCycle: Cycle | undefined
+    activeCycleId: string | null
+    markCurrentCycleAsFinished: () => void
 }
-const CyclesContext = createContext({})
+
+export const CyclesContext = createContext({} as CyclesContextType)
 
 export function Home() {
 
     const [cycles, setCycles] = useState<Cycle[]>([]) /*Minha lista de task como estado, sempre iniciando com a informaççao do mesmo tipo de utilização */
     const [activeCycleId, setActiveCycleId] = useState<string | null>(null)  // Ciclo que esta ativo
-   
-    /*formState  - fornece uma variavel chamada errors, possibilitando identificar as mensagens que ocorre em nosso form: formState.errors  // console.log(formState.errors) */
 
     const activeCycle = cycles.find((cycle) => cycle.id === activeCycleId)
 
-   
-
-    function handleCreateNewCycle(data: NewCycleFormData) {
-
-        const  id = String(new Date().getTime())
-
-        const newCycle: Cycle = {
-            id,
-            task: data.task,
-            minutesAmount: data.minutesAmount,
-            startDate: new Date(),
-        }
-        // setCycles([...cycles, newCycle])  /* Correto, mas como esse valor depende do valor atual vamos setar na forma de funççao*/
-        
-         setCycles((state) =>[...state, newCycle])  
-         setActiveCycleId(id)
-         setAmountSecondsPassed(0)
-        
-        reset();
+    function markCurrentCycleAsFinished () {
+       
+            setCycles(state =>  state.map((cycle) => {
+                if(cycle.id === activeCycleId) {
+                    return { ...cycle, finishedDate: new Date() }
+                 } else {
+                     return cycle
+                 }
+             })
+        )
     }
+
+    /*o useEffect pode ter um retorno*/
+    /* useEffect({ return },[])*/
+    /*Esse  useEffect é para calcular a diferença do tempo passado em cada segundo e
+      E se a diferença for maior ou igual ao total de segundos defindo(no caso terminou) então chama a função de finalizar
+    */
+    useEffect(() => {
+        let interval: number;
+
+        if (activeCycle) {
+
+            interval = setInterval(()=> {
+
+               const secondsDifference =  differenceInSeconds( 
+                    new Date(), 
+                    activeCycle.startDate
+                ) /*calcula a diferença de segundos que já passaram, da data atual para data que começou o cliclo dentro de um intervalo de segundos começou o cilco  */
+                
+                if (secondsDifference >= totalSeconds ) {
+                    setCycles(state =>  state.map((cycle) => {
+                        if(cycle.id === activeCycleId) {
+                            return { ...cycle, finishedDate: new Date() }
+                         } else {
+                             return cycle
+                         }
+                     })
+                )
+                
+                setAmountSecondsPassed(totalSeconds)
+
+                clearInterval(interval)
+                } else {
+                    setAmountSecondsPassed( secondsDifference )
+
+                }
+            }, 1000)
+        }
+
+        return () => {
+            clearInterval(interval)
+        }
+
+    }, [activeCycle, totalSeconds, activeCycleId])
+   
+    /*o useEffect pode ter um retorno*/
+    /* useEffect({ return },[])*/
+    /*Esse  useEffect é para calcular a diferença do tempo passado em cada segundo e
+      E se a diferença for maior ou igual ao total de segundos defindo(no caso terminou) então chama a função de finalizar
+    */
+    useEffect(() => {
+        let interval: number;
+
+        if (activeCycle) {
+
+            interval = setInterval(()=> {
+
+               const secondsDifference =  differenceInSeconds( 
+                    new Date(), 
+                    activeCycle.startDate
+                ) /*calcula a diferença de segundos que já passaram, da data atual para data que começou o cliclo dentro de um intervalo de segundos começou o cilco  */
+                
+                if (secondsDifference >= totalSeconds ) {
+                    setCycles(state =>  state.map((cycle) => {
+                        if(cycle.id === activeCycleId) {
+                            return { ...cycle, finishedDate: new Date() }
+                         } else {
+                             return cycle
+                         }
+                     })
+                )
+                
+                setAmountSecondsPassed(totalSeconds)
+
+                clearInterval(interval)
+                } else {
+                    setAmountSecondsPassed( secondsDifference )
+
+                }
+            }, 1000)
+        }
+
+        return () => {
+            clearInterval(interval)
+        }
+
+    }, [activeCycle, totalSeconds, activeCycleId])
+
+    // function handleCreateNewCycle(data: NewCycleFormData) {
+
+    //     const  id = String(new Date().getTime())
+
+    //     const newCycle: Cycle = {
+    //         id,
+    //         task: data.task,
+    //         minutesAmount: data.minutesAmount,
+    //         startDate: new Date(),
+    //     }
+    //     // setCycles([...cycles, newCycle])  /* Correto, mas como esse valor depende do valor atual vamos setar na forma de funççao*/
+        
+    //      setCycles((state) =>[...state, newCycle])  
+    //      setActiveCycleId(id)
+    //      setAmountSecondsPassed(0)
+        
+    //     reset();
+    // }
 
    function handleInterruptCycle() {
        
@@ -80,35 +176,24 @@ export function Home() {
         setActiveCycleId(null)
   }
 
-   const currentSeconds = activeCycle ? totalSeconds - amountSecondsPassed : 0
-
-   const minutesAmount = Math.floor(currentSeconds / 60)  // Dividindo o total de secundos por sessenta e arredondando para baixo
-   const secondsAmount = currentSeconds % 60
-
-   const minutes = String(minutesAmount).padStart(2, '0') // padStart sempre vai preencher com 2 caracteres
-   const seconds = String(secondsAmount).padStart(2, '0') // padStart sempre vai preencher com 2 caracteres
-
-   useEffect(()=> {
-    if(activeCycle) {
-        document.title = `${minutes}:${seconds}`
-    }
-   }, [minutes, seconds, activeCycle])
-
+  
     
-    const task = watch('task')
-    const isSubmitDisabled = !task
+    // const task = watch('task')
+
+    // const isSubmitDisabled = !task
 
     return(
         <HomeContainer>
-            <form onSubmit={handleSubmit(handleCreateNewCycle)} action="">
+            <form /* onSubmit={handleSubmit(handleCreateNewCycle)} */ action="">
 
-               <NewCycleForm />  
+            <CyclesContext.Provider value={{ activeCycle, activeCycleId, markCurrentCycleAsFinished }}>
 
-               <Countdown  
-                    activeCycle={activeCycle}
-                    setCycles={setCycles}
-                    activeCycleId={activeCycleId}
-                />
+               <NewCycleForm />
+
+               {/* /* PROPRIEDADES UTILIZADA PELO COUNTDOWN  activeCycle={activeCycle}  setCycles={setCycles}activeCycleId={activeCycleId} */}
+               <Countdown   />
+
+            </CyclesContext.Provider>
            
                { activeCycle ? (
                         <StopCountdownButton onClick={handleInterruptCycle} type="button">
@@ -116,7 +201,7 @@ export function Home() {
                             Interromper
                         </StopCountdownButton>
                     ) : (
-                        <StartCountdownButton disabled={isSubmitDisabled} type="submit">
+                        <StartCountdownButton/* disabled={isSubmitDisabled} */type="submit">
                             <Play size={24} />
                             Começar
                         </StartCountdownButton>

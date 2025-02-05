@@ -50,9 +50,13 @@ export function Home() {
         }
     })
 
-    const { handleSubmit, watch,/* reset */ } = newCycleForm
-
-   
+    const { handleSubmit, watch, reset  } = newCycleForm
+    
+    // handle será chamado diretamente de um evento
+    function handleCreateNewCycle(data: NewCycleFormData) {
+        createNewCycle(data)
+        reset()
+    }
     
     const task = watch('task')
 
@@ -60,7 +64,7 @@ export function Home() {
 
     return(
         <HomeContainer>
-            <form  onSubmit={handleSubmit(createNewCycle)}  action="">
+            <form  onSubmit={handleSubmit(handleCreateNewCycle)}  action="">
 
            
                 {/* /*FormProvider é o context padrão do react-hook-form */}

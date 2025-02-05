@@ -8,9 +8,7 @@ export function History() {
         <HistoryContainer>
 
             <h1> Meu Historico </h1>
-            <pre> 
-                {JSON.stringify(cycles, null, 2)}
-            </pre>
+            {/* <pre>  {JSON.stringify(cycles, null, 2)} </pre> */}
 
             <HistoryList>
                 <table>
@@ -24,50 +22,21 @@ export function History() {
                     </thead>
 
                     <tbody>
-                        <tr>
-                            <td> Conserto de débito técnico </td>
-                            <td> 25 minutos </td>
-                            <td> Há cerca de 2 semana </td>
-                            <td>
-                                <Status statusColor="green"> Concluido </Status>
-                            </td>
-                        </tr>
+                        {cycles.map((cycle)=> {
+                            return(
+                                <tr key={cycle.id}>
+                                    <td> {cycle.task} </td>
+                                    <td> {cycle.minutesAmount} </td>
+                                    <td> {cycle.startDate.toISOString()} </td>
+                                    <td>
+                                        { cycle.finishedDate && (<Status statusColor="green"> Concluido </Status>) }
+                                        { cycle.interruptedDate && (<Status statusColor="red"> Interrompido </Status>) }
+                                        { !cycle.finishedDate && !cycle.interruptedDate && (<Status statusColor="yellow"> Em andamento </Status>) }
+                                    </td>
+                                </tr>
+                            )
+                        })}
 
-                        <tr>
-                            <td> Conserto de débito técnico </td>
-                            <td> 25 minutos </td>
-                            <td> Há cerca de 2 semana </td>
-                            <td>
-                                <Status statusColor="red"> Interrompido </Status>
-                            </td>
-                        </tr>
-
-                        <tr>
-                            <td> Conserto de débito técnico </td>
-                            <td> 25 minutos </td>
-                            <td> Há cerca de 2 semana </td>
-                            <td>
-                                <Status statusColor="yellow"> Em andamento </Status>
-                            </td>
-                        </tr>
-
-                        <tr>
-                            <td> Conserto de débito técnico </td>
-                            <td> 25 minutos </td>
-                            <td> Há cerca de 2 semana </td>
-                            <td>
-                                <Status statusColor="green"> Em andamento </Status>
-                            </td>
-                        </tr>
-
-                        <tr>
-                            <td> Conserto de débito técnico </td>
-                            <td> 25 minutos </td>
-                            <td> Há cerca de 2 semana </td>
-                            <td>
-                                <Status statusColor="yellow"> Em andamento </Status>
-                            </td>
-                        </tr>
 
                     </tbody>
                 </table>    

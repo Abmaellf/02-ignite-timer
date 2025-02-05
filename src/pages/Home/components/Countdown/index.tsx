@@ -1,14 +1,7 @@
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect } from "react";
 import { CountdownContainer, Separator } from "./styles";
 import { differenceInSeconds } from "date-fns";
-import { CyclesContext } from "../..";
-
-interface  CountdownProps {
-    activeCycle: any,
-    setCycles: any,
-    activeCycleId: any
-}
-
+import { CyclesContext } from "../../../../contexts/CyclesContext";
 
  export function Countdown() {
     const { 
@@ -18,11 +11,8 @@ interface  CountdownProps {
         amountSecondsPassed,
         setSecondsPassed
      } = useContext(CyclesContext)
-
-    
     
     const totalSeconds =  activeCycle ? activeCycle.minutesAmount * 60 : 0  // Verifica se tem ciclo ativo e se ativo, então o total de segundos será o minutos do ciclo ativo vezez 60 se não zero
-
 
     /*o useEffect pode ter um retorno*/
     /* useEffect({ return },[])*/

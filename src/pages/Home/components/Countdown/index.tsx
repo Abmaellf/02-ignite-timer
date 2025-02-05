@@ -11,9 +11,15 @@ interface  CountdownProps {
 
 
  export function Countdown() {
-    const { activeCycle, activeCycleId, markCurrentCycleAsFinished } = useContext(CyclesContext)
+    const { 
+        activeCycle, 
+        activeCycleId, 
+        markCurrentCycleAsFinished,
+        amountSecondsPassed,
+        setSecondsPassed
+     } = useContext(CyclesContext)
 
-    const [amountSecondsPasse, setAmountSecondsPassed] = useState(0) // O total de segundos que já se passou, desde que o ciclo foi ativado
+    
     
     const totalSeconds =  activeCycle ? activeCycle.minutesAmount * 60 : 0  // Verifica se tem ciclo ativo e se ativo, então o total de segundos será o minutos do ciclo ativo vezez 60 se não zero
 
@@ -37,20 +43,12 @@ interface  CountdownProps {
                 
                 if (secondsDifference >= totalSeconds ) {
                     markCurrentCycleAsFinished()
-                //     setCycles(state =>  state.map((cycle) => {
-                //         if(cycle.id === activeCycleId) {
-                //             return { ...cycle, finishedDate: new Date() }
-                //          } else {
-                //              return cycle
-                //          }
-                //      })
-                // )
-                
-                setAmountSecondsPassed(totalSeconds)
+                    setSecondsPassed(totalSeconds)
+                    clearInterval(interval)
 
                 clearInterval(interval)
                 } else {
-                    setAmountSecondsPassed( secondsDifference )
+                    setSecondsPassed( secondsDifference )
 
                 }
             }, 1000)
@@ -60,7 +58,7 @@ interface  CountdownProps {
             clearInterval(interval)
         }
 
-    }, [activeCycle, totalSeconds, activeCycleId, markCurrentCycleAsFinished])
+    }, [activeCycle, totalSeconds, activeCycleId,setSecondsPassed, markCurrentCycleAsFinished])
 
      const currentSeconds = activeCycle ? totalSeconds - amountSecondsPassed : 0
     

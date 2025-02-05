@@ -1,38 +1,18 @@
-import { useForm } from "react-hook-form";
+import { useForm, useFormContext } from "react-hook-form";
 import { FormContainer, MinutesAmountInput, TaskInput } from "./styles";
 import * as zod from 'zod';
 import { zodResolver } from "@hookform/resolvers/zod";
+import { CyclesContext } from "../..";
+import { useContext } from "react";
 
 
-const newCycleFormValidationSchema = zod.object({
-    task: zod.string().min(1, 'Informe a tarefa'),
-    minutesAmount: 
-        zod.number()
-            .min(1, 'O ciclo precisa ser de no mínimo de 5 minutos') /* ajuste para um minuto para teste*/
-            .max(60, 'O ciclo precisa se de no maximo de 60 minutos')
-   
-})
-/*      Preferimos utilizar uma interface quando vamos definir um objeto de validação
-        interface NewCycleFormData {
-            task: string;
-            minutesAmount: number;
-        }     
-*/
 
-/* E prefirimos utilizaro type quando vamos criar uma tipagem apartir de outra referencia ou variável: do typescript*/
-/* Agora não é mais necessário utilizar a interface */
-type NewCycleFormData = zod.infer<typeof newCycleFormValidationSchema>
 
 export function NewCycleForm() {
+    const { activeCycle } = useContext(CyclesContext)
+    const { register } = useFormContext()
 
-    /*formState  - fornece uma variavel chamada errors, possibilitando identificar as mensagens que ocorre em nosso form: formState.errors  // console.log(formState.errors) */
-    const { register, handleSubmit, watch, reset /*formState*/ } = useForm<NewCycleFormData>({
-        resolver: zodResolver(newCycleFormValidationSchema),
-        defaultValues: {
-            task: '',
-            minutesAmount: 0,  
-        }
-    })
+   
     return(
         <FormContainer>
                      <label htmlFor="task">Vou trabalhar em</label>
@@ -67,5 +47,4 @@ export function NewCycleForm() {
                      <span>Minutos.</span>
                  </FormContainer>
     )
-
 }

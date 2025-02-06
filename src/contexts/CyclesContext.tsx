@@ -25,34 +25,54 @@ interface CyclesContextType {
     interruptCurrentCycle: () => void
 }
 
-
 export const CyclesContext = createContext({} as CyclesContextType)
 
 interface CyclesContextProviderProps {
     children: ReactNode
 }
 
-
+interface CyclesState {
+    cycles: Cycle[]
+    activeCycleId: string | null
+}
 
 export function CycleContextProvider({ children }: CyclesContextProviderProps) {
 
      /*Minha lista de task como estado, sempre iniciando com a informaççao do mesmo tipo de utilização */
-     const [cycles, dispatch] =  useReducer((state: Cycle[], action: any) => {
+     const [cyclesState, dispatch] =  useReducer((state: CyclesState, action: any) => {
         if(action .type === 'ADD_NEW_CYCLE') {
-            return [...state, action.payload.newCycle ]
+            return {
+                ...state,
+                cycles:  [ ...state.cycles, action.payload.newCycle],
+                activeCycleId: action.payload.newCycle.id, 
+            }
         }
-        console.log(state)
-        console.log(action)
 
+        if(action.type === 'INTERRUPT_CURRENT_CYCLE') {
+            return {
+                ...state,
+                cycles: state.cycles.map((cycle) => {
+                    if(cycle.id === state.activeCycleId) {
+                        return { ...cycle, interruptedDate: new Date() }
+                     } else {
+                         return cycle
+                     }
+                 }),
+                activeCycleId: null,
+            }
+        }
         return state
-     }, [])  /* useState<Cycle[]>([])    --> remover para criar o reducer*/
+     }, {
+        cycles: [],
+        activeCycleId: null
+     })  /* useState<Cycle[]>([])    --> remover para criar o reducer*/
+     
+     const [amountSecondsPassed, setAmountSecondsPassed] = useState(0) // O total de segundos que já se passou, desde que o ciclo foi ativado
 
+     const { cycles, activeCycleId } = cyclesState;
+     const activeCycle = cycles.find((cycle) => cycle.id === activeCycleId)
 
-    const [activeCycleId, setActiveCycleId] = useState<string | null>(null)  // Ciclo que esta ativo
-    const [amountSecondsPassed, setAmountSecondsPassed] = useState(0) // O total de segundos que já se passou, desde que o ciclo foi ativado
-    const activeCycle = cycles.find((cycle) => cycle.id === activeCycleId)
-
-    
+    // NÃO PRECISA MAIS const [activeCycleId, setActiveCycleId] = useState<string | null>(null)  // Ciclo que esta ativo
 
     function setSecondsPassed(seconds: number) {
         setAmountSecondsPassed(seconds)
@@ -96,15 +116,11 @@ export function CycleContextProvider({ children }: CyclesContextProviderProps) {
                 newCycle,
             },
          })
-        
-         setActiveCycleId(id)
          setAmountSecondsPassed(0)
-        
         // reset(); Não será mais chamado aqui
     }
 
     function interruptCurrentCycle() {
-
     //    setCycles((state) =>
     //    state.map((cycle) => {
     //            if(cycle.id === activeCycleId) {
@@ -121,8 +137,6 @@ export function CycleContextProvider({ children }: CyclesContextProviderProps) {
             activeCycleId,
         },
     })
-
-        setActiveCycleId(null)
   }
     return(
         <CyclesContext.Provider 
@@ -139,5 +153,4 @@ export function CycleContextProvider({ children }: CyclesContextProviderProps) {
             {children}
          </CyclesContext.Provider>
     )
-
 }

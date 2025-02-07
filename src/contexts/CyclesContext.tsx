@@ -46,7 +46,7 @@ export function CycleContextProvider({ children }: CyclesContextProviderProps) {
     } 
 
     function markCurrentCycleAsFinished () {
-        dispatch(markCurrentCycleAsFinishedAction)
+        dispatch(markCurrentCycleAsFinishedAction())
     }
 
     function createNewCycle(data: CreateCycleData) {
@@ -78,7 +78,7 @@ export function CycleContextProvider({ children }: CyclesContextProviderProps) {
     //         }),
     //     )
 
-    dispatch(interruptCurrentCycleAction)
+    dispatch(interruptCurrentCycleAction())
   }
     return(
         <CyclesContext.Provider 

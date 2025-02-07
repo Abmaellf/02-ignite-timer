@@ -28,7 +28,7 @@ import { CyclesContext } from "../../../../contexts/CyclesContext";
 
                const secondsDifference =  differenceInSeconds( 
                     new Date(), 
-                    activeCycle.startDate
+                    new Date(activeCycle.startDate)
                 ) /*calcula a diferença de segundos que já passaram, da data atual para data que começou o cliclo dentro de um intervalo de segundos começou o cilco  */
                 
                 if (secondsDifference >= totalSeconds ) {

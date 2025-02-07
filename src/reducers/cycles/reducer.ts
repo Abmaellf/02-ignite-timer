@@ -10,13 +10,10 @@ export interface Cycle {
     finishedDate?: Date // Data da conclusão do ciclo Essa data é opcional
 } 
 
-
 interface CyclesState {
     cycles: Cycle[]
     activeCycleId: string | null
 }
-
-
 
 export function cyclesReducer(state: CyclesState, action: any) {
         switch(action.type) {
